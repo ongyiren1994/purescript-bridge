@@ -145,7 +145,7 @@ instances settings st@(SumType t _ is) = map go is
       where
         encodeOpts = case Switches.generateForeign settings of
                       Nothing -> ""
-                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> ", fieldTransform = (\\x -> case x of\n" <> T.pack (replicate 105 ' ') <> "\"_data\" -> \"data\"\n" <> T.pack (replicate 105 ' ') <> "\"_type\" -> \"type\"\n" <> T.pack (replicate 105 ' ') <> "\"y\" -> \"y\"" <> " ) <<< drop 1}"
+                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> ", fieldTransform = (\\x -> case x of\n" <> T.pack (replicate 105 ' ') <> "\"_data\" -> \"data\"\n" <> T.pack (replicate 105 ' ') <> "\"_type\" -> \"type\"\n" <> T.pack (replicate 105 ' ') <> "y -> y" <> " ) <<< drop 1}"
         stpLength = length sumTypeParameters
         extras | stpLength == 0 = mempty
                | otherwise = bracketWrap constraintsInner <> " => "
@@ -158,7 +158,7 @@ instances settings st@(SumType t _ is) = map go is
       where
         decodeOpts = case Switches.generateForeign settings of
                       Nothing -> ""
-                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> ", fieldTransform = (\\x -> case x of\n" <> T.pack (replicate 105 ' ') <> "\"_data\" -> \"data\"\n" <> T.pack (replicate 105 ' ') <> "\"_type\" -> \"type\"\n" <> T.pack (replicate 105 ' ') <> "\"y\" -> \"y\"" <> " ) <<< drop 1}"
+                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> ", fieldTransform = (\\x -> case x of\n" <> T.pack (replicate 105 ' ') <> "\"_data\" -> \"data\"\n" <> T.pack (replicate 105 ' ') <> "\"_type\" -> \"type\"\n" <> T.pack (replicate 105 ' ') <> "y\" -> y\"" <> " ) <<< drop 1}"
         stpLength = length sumTypeParameters
         extras | stpLength == 0 = mempty
                | otherwise = bracketWrap constraintsInner <> " => "
