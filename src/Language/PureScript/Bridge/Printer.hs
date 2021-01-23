@@ -100,6 +100,7 @@ _foreignImports settings
       [ ImportLine "Foreign.Generic" $ Set.fromList ["defaultOptions", "genericDecode", "genericEncode"]
       , ImportLine "Foreign.Class" $ Set.fromList ["class Decode", "class Encode"]
       , ImportLine "Data.Generic.Rep.Show" $ Set.fromList ["genericShow"]
+      , ImportLine "Data.String" $ Set.fromList ["drop"]
       ]
   | otherwise = []
 
@@ -144,7 +145,7 @@ instances settings st@(SumType t _ is) = map go is
       where
         encodeOpts = case Switches.generateForeign settings of
                       Nothing -> ""
-                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> " }"
+                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> ", fieldTransform = (\\x -> case x of\n" <> T.pack (replicate 105 ' ') <> "\"_data\" -> data\n" <> T.pack (replicate 105 ' ') <> "\"_type\" -> \"type\"\n" <> T.pack (replicate 105 ' ') <> "\"y\" -> \"y\"" <> " ) <<< drop 1}"
         stpLength = length sumTypeParameters
         extras | stpLength == 0 = mempty
                | otherwise = bracketWrap constraintsInner <> " => "
@@ -157,7 +158,7 @@ instances settings st@(SumType t _ is) = map go is
       where
         decodeOpts = case Switches.generateForeign settings of
                       Nothing -> ""
-                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> " }"
+                      Just fopts -> " { unwrapSingleConstructors = " <> (T.toLower . T.pack . show . Switches.unwrapSingleConstructors) fopts <> ", fieldTransform = (\\x -> case x of\n" <> T.pack (replicate 105 ' ') <> "\"_data\" -> data\n" <> T.pack (replicate 105 ' ') <> "\"_type\" -> \"type\"\n" <> T.pack (replicate 105 ' ') <> "\"y\" -> \"y\"" <> " ) <<< drop 1}"
         stpLength = length sumTypeParameters
         extras | stpLength == 0 = mempty
                | otherwise = bracketWrap constraintsInner <> " => "
