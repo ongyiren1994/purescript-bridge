@@ -97,8 +97,9 @@ _lensImports settings
 _foreignImports :: Switches.Settings -> [ImportLine]
 _foreignImports settings
   | (isJust . Switches.generateForeign) settings = 
-      [ ImportLine "Foreign.Generic" $ Set.fromList ["defaultOptions", "genericDecode", "genericEncode", "genericShow"]
+      [ ImportLine "Foreign.Generic" $ Set.fromList ["defaultOptions", "genericDecode", "genericEncode"]
       , ImportLine "Foreign.Class" $ Set.fromList ["class Decode", "class Encode"]
+      , ImportLine "Data.Generic.Rep.Show" $ Set.fromList ["genericShow"]
       ]
   | otherwise = []
 
