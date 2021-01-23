@@ -97,7 +97,7 @@ _lensImports settings
 _foreignImports :: Switches.Settings -> [ImportLine]
 _foreignImports settings
   | (isJust . Switches.generateForeign) settings = 
-      [ ImportLine "Foreign.Generic" $ Set.fromList ["defaultOptions", "genericDecode", "genericEncode"]
+      [ ImportLine "Foreign.Generic" $ Set.fromList ["defaultOptions", "genericDecode", "genericEncode", "genericShow"]
       , ImportLine "Foreign.Class" $ Set.fromList ["class Decode", "class Encode"]
       ]
   | otherwise = []
@@ -164,6 +164,16 @@ instances settings st@(SumType t _ is) = map go is
         constraintsInner = T.intercalate ", " $ map instances sumTypeParameters
         instances params = genericInstance settings params <> ", " <> decodeInstance params
         bracketWrap x = "(" <> x <> ")"
+    go Show = "instance show" <> _typeName t <> " :: " <> extras <> "Show " <> typeInfoToText False t <> " where\n" <>
+                "  show = genericShow"
+      where
+        stpLength = length sumTypeParameters
+        extras | stpLength == 0 = mempty
+               | otherwise = bracketWrap constraintsInner <> " => "
+        sumTypeParameters = filter (isTypeParam t) . Set.toList $ getUsedTypes st
+        constraintsInner = T.intercalate ", " $ map instances sumTypeParameters
+        instances params = genericInstance settings params <> ", " <> showInstance params
+        bracketWrap x = "(" <> x <> ")"
     go i = "derive instance " <> T.toLower c <> _typeName t <> " :: " <> extras i <> c <> " " <> typeInfoToText False t <> postfix i
       where c = T.pack $ show i
             extras Generic | stpLength == 0 = mempty
@@ -188,6 +198,9 @@ encodeInstance params = "Encode " <> typeInfoToText False params
 
 decodeInstance :: PSType -> Text
 decodeInstance params = "Decode " <> typeInfoToText False params
+
+showInstance :: PSType -> Text
+showInstance params = "Show " <> typeInfoToText False params
 
 genericInstance :: Switches.Settings -> PSType -> Text
 genericInstance settings params =
