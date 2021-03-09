@@ -99,7 +99,7 @@ _foreignImports settings
   | (isJust . Switches.generateForeign) settings = 
       [ ImportLine "Foreign.Generic" $ Set.fromList ["defaultOptions", "genericDecode", "genericEncode"]
       , ImportLine "Foreign.Class" $ Set.fromList ["class Decode", "class Encode"]
-      , ImportLine "Data.Generic.Rep.Show" $ Set.fromList ["genericShow"]
+      , ImportLine "Data.Show.Generic" $ Set.fromList ["genericShow"]
       , ImportLine "Data.String" $ Set.fromList ["drop"]
       ]
   | otherwise = []
