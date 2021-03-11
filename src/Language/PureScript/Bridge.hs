@@ -115,7 +115,7 @@ writeLensWith :: Switches.Switch -> FilePath -> [Char] -> T.Text -> FullBridge -
 writeLensWith switch root fileName moduleName bridge sts = do
 
     unlessM (doesDirectoryExist root) $ createDirectoryIfMissing True root
-    T.writeFile ( root </> fileName) ("module" <> moduleName <> "where\n" <> "import Data.Lens (\"Lens'\")\n\n" <> T.unlines (nub ( concat (mapM (gatherSumClasses settings ) modules))))
+    T.writeFile ( root </> fileName) ("module " <> moduleName <> " where\n" <> "import Data.Lens (\"Lens'\")\n\n" <> T.unlines (nub ( concat (mapM (gatherSumClasses settings ) modules))))
     where
        modules = M.elems $ sumTypesToModules M.empty bridged
        settings = Switches.getSettings switch
