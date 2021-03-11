@@ -8,6 +8,7 @@ module Language.PureScript.Bridge (
   , writePSTypes
   , writePSTypesWith
   , defaultSwitch, noLenses, genLenses
+  , writeLensWith
  ) where
 
 
@@ -24,6 +25,11 @@ import           Language.PureScript.Bridge.SumType         as Bridge
 import           Language.PureScript.Bridge.Tuple           as Bridge
 import           Language.PureScript.Bridge.TypeInfo        as Bridge
 import           Language.PureScript.Bridge.CodeGenSwitches as Switches
+import           Data.List
+import qualified Data.Text as T
+import           System.Directory
+import           System.FilePath
+import           Data.Maybe (isJust)
 
 -- | Your entry point to this library and quite likely all you will need.
 --   Make sure all your types derive `Generic` and `Typeable`.
@@ -80,7 +86,6 @@ import           Language.PureScript.Bridge.CodeGenSwitches as Switches
 writePSTypes :: FilePath -> FullBridge -> [SumType 'Haskell] -> IO ()
 writePSTypes = writePSTypesWith Switches.defaultSwitch
 
-
 -- | Works like `writePSTypes` but you can add additional switches to control the generation of your PureScript code
 --
 --  == Switches/Settings:
@@ -91,6 +96,7 @@ writePSTypes = writePSTypesWith Switches.defaultSwitch
 --   This function overwrites files - make backups or use version control!
 writePSTypesWith :: Switches.Switch -> FilePath -> FullBridge -> [SumType 'Haskell] -> IO ()
 writePSTypesWith switch root bridge sts = do
+
     mapM_ (printModule settings root) modules
     T.putStrLn "The following purescript packages are needed by the generated code:\n"
     mapM_ (T.putStrLn . mappend "  - ") packages
@@ -106,6 +112,22 @@ writePSTypesWith switch root bridge sts = do
             else
                 sumTypesToNeededPackages bridged
 
+_lensClassImports :: Switches.Settings -> [ImportLine]
+_lensClassImports settings
+  | (isJust . Switches.generateForeign) settings =
+      [ ImportLine "Data.Lens" $ Set.fromList ["Lens'"]
+      ]
+  | otherwise = []
+
+writeLensWith :: Switches.Switch -> FilePath -> FullBridge -> [SumType 'Haskell] -> IO ()
+writeLensWith switch root bridge sts = do
+
+    unlessM (doesDirectoryExist root) $ createDirectoryIfMissing True root
+    T.writeFile ( root </> "Lens.purs") ("Import Data.Lens (\"Lens'\")\n\n" <> T.unlines (nub ( concat (mapM (gatherSumClasses settings ) modules))))
+    where
+       modules = M.elems $ sumTypesToModules M.empty bridged
+       settings = Switches.getSettings switch
+       bridged = map (bridgeSumType bridge) sts
 
 -- | Translate all 'TypeInfo' values in a 'SumType' to PureScript types.
 --

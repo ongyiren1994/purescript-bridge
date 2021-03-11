@@ -64,12 +64,13 @@ moduleToText settings m = T.unlines $
      , "import Prelude"
      , ""
      ]
-  <> sumClassesToText (nub (concat (map (sumLensableRecLabels settings) (psTypes m))))
   <> map (sumTypeToText settings) (psTypes m)
   where
     otherImports = importsFromList (_lensImports settings <> _genericsImports settings <> _foreignImports settings)
     allImports = Map.elems $ mergeImportLines otherImports (psImportLines m)
 
+gatherSumClasses :: Switches.Settings -> PSModule -> [Text]
+gatherSumClasses settings m = sumClassesToText (nub (concat (map (sumLensableRecLabels settings) (psTypes m))))
 
 _genericsImports :: Switches.Settings -> [ImportLine]
 _genericsImports settings
@@ -96,7 +97,7 @@ _lensImports settings
 
 _foreignImports :: Switches.Settings -> [ImportLine]
 _foreignImports settings
-  | (isJust . Switches.generateForeign) settings = 
+  | (isJust . Switches.generateForeign) settings =
       [ ImportLine "Foreign.Generic" $ Set.fromList ["defaultOptions", "genericDecode", "genericEncode"]
       , ImportLine "Foreign.Class" $ Set.fromList ["class Decode", "class Encode"]
       , ImportLine "Data.Show.Generic" $ Set.fromList ["genericShow"]
