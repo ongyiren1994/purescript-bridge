@@ -89,6 +89,7 @@ _lensImports settings
     , ImportLine "Data.Lens.Iso.Newtype" $ Set.fromList ["_Newtype"]
     , ImportLine "Data.Symbol" $ Set.fromList ["SProxy(SProxy)"]
     , ImportLine "Data.Newtype" $ Set.fromList ["class Newtype"]
+    , ImportLine "Utils.Lens" $ Set.fromList []
     ]
   | otherwise =
     [ ImportLine "Data.Maybe" $ Set.fromList ["Maybe(..)"]
