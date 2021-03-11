@@ -29,7 +29,6 @@ import           Data.List
 import qualified Data.Text as T
 import           System.Directory
 import           System.FilePath
-import           Data.Maybe (isJust)
 
 -- | Your entry point to this library and quite likely all you will need.
 --   Make sure all your types derive `Generic` and `Typeable`.
@@ -112,18 +111,11 @@ writePSTypesWith switch root bridge sts = do
             else
                 sumTypesToNeededPackages bridged
 
-_lensClassImports :: Switches.Settings -> [ImportLine]
-_lensClassImports settings
-  | (isJust . Switches.generateForeign) settings =
-      [ ImportLine "Data.Lens" $ Set.fromList ["Lens'"]
-      ]
-  | otherwise = []
-
-writeLensWith :: Switches.Switch -> FilePath -> FullBridge -> [SumType 'Haskell] -> IO ()
-writeLensWith switch root bridge sts = do
+writeLensWith :: Switches.Switch -> FilePath -> [Char] -> T.Text -> FullBridge -> [SumType 'Haskell] -> IO ()
+writeLensWith switch root fileName moduleName bridge sts = do
 
     unlessM (doesDirectoryExist root) $ createDirectoryIfMissing True root
-    T.writeFile ( root </> "Lens.purs") ("Import Data.Lens (\"Lens'\")\n\n" <> T.unlines (nub ( concat (mapM (gatherSumClasses settings ) modules))))
+    T.writeFile ( root </> fileName) ("module" <> moduleName <> "where\n" <> "import Data.Lens (\"Lens'\")\n\n" <> T.unlines (nub ( concat (mapM (gatherSumClasses settings ) modules))))
     where
        modules = M.elems $ sumTypesToModules M.empty bridged
        settings = Switches.getSettings switch
