@@ -153,7 +153,7 @@ instances settings st@(SumType t _ is) = map go is
                | otherwise = bracketWrap constraintsInner <> " => "
         sumTypeParameters = filter (isTypeParam t) . Set.toList $ getUsedTypes st
         constraintsInner = T.intercalate ", " $ map instances sumTypeParameters
-        instances params = genericInstance settings params <> ", " <> encodeInstance params
+        instances params = encodeInstance params
         bracketWrap x = "(" <> x <> ")"
     go Decode = "instance decode" <> _typeName t <> " :: " <> extras <> "Decode " <> typeInfoToText False t <> " where\n" <>
                 "  decode = genericDecode $ defaultOptions" <> decodeOpts
@@ -166,7 +166,7 @@ instances settings st@(SumType t _ is) = map go is
                | otherwise = bracketWrap constraintsInner <> " => "
         sumTypeParameters = filter (isTypeParam t) . Set.toList $ getUsedTypes st
         constraintsInner = T.intercalate ", " $ map instances sumTypeParameters
-        instances params = genericInstance settings params <> ", " <> decodeInstance params
+        instances params = decodeInstance params
         bracketWrap x = "(" <> x <> ")"
     go Show = "instance show" <> _typeName t <> " :: " <> extras <> "Show " <> typeInfoToText False t <> " where\n" <>
                 "  show = genericShow"
@@ -176,7 +176,7 @@ instances settings st@(SumType t _ is) = map go is
                | otherwise = bracketWrap constraintsInner <> " => "
         sumTypeParameters = filter (isTypeParam t) . Set.toList $ getUsedTypes st
         constraintsInner = T.intercalate ", " $ map instances sumTypeParameters
-        instances params = genericInstance settings params <> ", " <> showInstance params
+        instances params =  showInstance params
         bracketWrap x = "(" <> x <> ")"
     go i = "derive instance " <> T.toLower c <> _typeName t <> " :: " <> extras i <> c <> " " <> typeInfoToText False t <> postfix i
       where c = T.pack $ show i
@@ -211,7 +211,7 @@ genericInstance settings params =
   if not (Switches.genericsGenRep settings) then
     "Generic " <> typeInfoToText False params
   else
-    "Generic " <> typeInfoToText False params <> " r" <> mergedTypeInfoToText params
+    "Generic " <> typeInfoToText False params 
 
 sumTypeToOptics :: SumType 'PureScript -> Text
 sumTypeToOptics st = constructorOptics st <> recordOptics st
