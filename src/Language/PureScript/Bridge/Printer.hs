@@ -181,8 +181,6 @@ instances settings st@(SumType t _ is) = map go is
     go i = "derive instance " <> T.toLower c <> _typeName t <> " :: " <> extras i <> c <> " " <> typeInfoToText False t <> postfix i
       where c = T.pack $ show i
             extras Generic | stpLength == 0 = mempty
-                           | stpLength == 1 = genericConstraintsInner <> " => "
-                           | otherwise      = bracketWrap genericConstraintsInner <> " => "
             extras _ = ""
             postfix Newtype = " _"
             postfix Generic
@@ -191,8 +189,6 @@ instances settings st@(SumType t _ is) = map go is
             postfix _ = ""
             stpLength = length sumTypeParameters
             sumTypeParameters = filter (isTypeParam t) . Set.toList $ getUsedTypes st
-            genericConstraintsInner = T.intercalate ", " $ map (genericInstance settings) sumTypeParameters
-            bracketWrap x = "(" <> x <> ")"
 
 isTypeParam :: PSType -> PSType -> Bool
 isTypeParam t typ = _typeName typ `elem` map _typeName (_typeParameters t)
@@ -211,7 +207,7 @@ genericInstance settings params =
   if not (Switches.genericsGenRep settings) then
     "Generic " <> typeInfoToText False params
   else
-    "Generic " <> typeInfoToText False params 
+    ""
 
 sumTypeToOptics :: SumType 'PureScript -> Text
 sumTypeToOptics st = constructorOptics st <> recordOptics st
